@@ -22,7 +22,7 @@ class RoundChart @JvmOverloads constructor(
         private const val START_ANGLE = -90
 
         @Throws(IllegalArgumentException::class)
-        public fun getAngleByPercent(percent: Float): Float {
+        fun getAngleByPercent(percent: Float): Float {
             if (percent > 100f || percent < 0f)
                 throw IllegalArgumentException("Value " + percent.toString() + " cannot be used as percent!")
             return (360f / 100f) * percent
@@ -36,9 +36,14 @@ class RoundChart @JvmOverloads constructor(
     private val innerBorderCirclePath = Path()
     private val externalCirclePicker = Path()
     private val innerCirclePicker = Path()
+    private val mainCircle = Path()
+
+    private lateinit var gradientPicker: LinearGradient
+    private lateinit var gradientCircle: LinearGradient
+
 
     var percentExternal: Float = 0f
-    var percentInner: Float = 100f
+    var percentInner: Float = 0f
 
     init {
         init(attrs)
@@ -51,157 +56,70 @@ class RoundChart @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        drawExternalCircle(canvas)
-        drawInnerCircle(canvas)
-        drawPicker(canvas)
-    }
-
-    private fun drawExternalCircle(canvas: Canvas) {
-        val radius = getRadius(viewWidth.toFloat(), viewHeight.toFloat())
-
-        externalBorderCirclePath.reset()
-        externalBorderCirclePath.addCircle(
-            viewWidth.toFloat() / 2,
-            viewHeight.toFloat() / 2,
-            radius,
-            Path.Direction.CW
+//        drawExternalCircle(canvas)
+        drawCircle(
+            canvas,
+            getRadius(viewWidth.toFloat(), viewHeight.toFloat()),
+            percentExternal,
+            externalBorderCirclePath,
+            Paint.Style.STROKE,
+            gradientCircle
+        )
+        drawCircle(
+            canvas,
+            getRadius(viewWidth.toFloat(), viewHeight.toFloat()) / 1.25f,
+            percentInner,
+            innerBorderCirclePath,
+            Paint.Style.STROKE,
+            gradientCircle
         )
 
-        val paint = Paint()
-        paint.color = Color.GREEN
-        paint.strokeWidth = 24f
-        paint.style = Paint.Style.STROKE
-
-        val centerX: Float = viewWidth.toFloat() / 2
-        val centerY: Float = viewHeight.toFloat() / 2
-        val oval = RectF()
-        paint.shader = LinearGradient(
-            0f,
-            0f,
-            0f,
-            height.toFloat(),
-            Color.GREEN,
-            Color.CYAN,
-            Shader.TileMode.CLAMP
-        )
-        paint.style = Paint.Style.STROKE
-
-        oval.set(
-            centerX - radius,
-            centerY - radius,
-            centerX + radius,
-            centerY + radius
-        )
-        canvas.drawArc(
-            oval,
-            START_ANGLE.toFloat(),
-            getAngleByPercent(percentExternal),
-            false,
-            paint
-        )
-        canvas.drawCircle(viewWidth / 2f, (viewHeight / 2f) - radius, 25f, Paint().apply {
-            style = Paint.Style.FILL
-            color = Color.BLACK
-        })
-        canvas.drawCircle(viewWidth / 2f, (viewHeight / 2f) + radius, 25f, Paint().apply {
-            style = Paint.Style.FILL
-            color = Color.BLACK
-        })
-
-        canvas.drawCircle(0f, viewHeight / 2f, 25f, Paint().apply {
-            style = Paint.Style.FILL
-            color = Color.BLACK
-        })
-
-        canvas.drawCircle(viewWidth.toFloat(), viewHeight / 2f, 25f, Paint().apply {
-            style = Paint.Style.FILL
-            color = Color.BLACK
-        })
-    }
-
-    private fun drawInnerCircle(canvas: Canvas) {
-        val width = width.toFloat()
-        val height = height.toFloat()
-        val radius = getRadius(viewWidth.toFloat(), viewHeight.toFloat()) / 2f
-
-        innerBorderCirclePath.reset()
-        innerBorderCirclePath.addCircle(
-            width / 2,
-            height / 2,
-            radius,
-            Path.Direction.CW
+        drawCircle(
+            canvas,
+            getRadius(viewWidth.toFloat(), viewHeight.toFloat()) / 2f,
+            100f,
+            mainCircle,
+            Paint.Style.FILL,
+            gradientCircle
         )
 
-        val paint = Paint()
-        paint.setShadowLayer(50f, 0f, 0f, Color.BLACK)
-        setLayerType(LAYER_TYPE_SOFTWARE, paint);
-        paint.color = Color.CYAN
-        paint.strokeWidth = 10f
-        paint.style = Paint.Style.STROKE
-        paint.shader = LinearGradient(
-            0f,
-            0f,
-            0f,
-            getHeight().toFloat(),
-            Color.GREEN,
-            Color.CYAN,
-            Shader.TileMode.CLAMP
+        drawPicker(
+            canvas,
+            getRadius(viewWidth.toFloat(), viewHeight.toFloat()),
+            percentExternal,
+            externalCirclePicker,
+            gradientPicker
         )
-
-        val centerX: Float
-        val centerY: Float
-        val oval = RectF()
-        paint.style = Paint.Style.FILL
-
-        centerX = width / 2
-        centerY = height / 2
-
-        oval.set(
-            centerX - radius,
-            centerY - radius,
-            centerX + radius,
-            centerY + radius
+        drawPicker(
+            canvas,
+            getRadius(viewWidth.toFloat(), viewHeight.toFloat()) / 1.25f,
+            percentInner,
+            innerCirclePicker,
+            gradientPicker
         )
-        canvas.drawArc(oval, START_ANGLE.toFloat(), getAngleByPercent(percentExternal.toFloat()), true, paint)
     }
 
     private fun drawCircle(
-        canvas: Canvas,
-        circleRadius: Float,
-        percentAngle: Float,
-        circlePath: Path
-    ) {
+        canvas: Canvas, circleRadius: Float, percentAngle: Float,
+        circlePath: Path, style: Paint.Style, linearGradient: LinearGradient) {
         val width = width.toFloat()
         val height = height.toFloat()
 
         circlePath.reset()
-        circlePath.addCircle(
-            width / 2,
-            height / 2,
-            circleRadius,
-            Path.Direction.CW
-        )
+        circlePath.addCircle(width / 2, height / 2, circleRadius, Path.Direction.CW)
 
         val paint = Paint()
         paint.setShadowLayer(50f, 0f, 0f, Color.BLACK)
         setLayerType(LAYER_TYPE_SOFTWARE, paint)
         paint.color = Color.CYAN
-        paint.strokeWidth = 10f
+        paint.strokeWidth = 20f
         paint.style = Paint.Style.STROKE
-        paint.shader = LinearGradient(
-            0f,
-            0f,
-            0f,
-            getHeight().toFloat(),
-            Color.GREEN,
-            Color.CYAN,
-            Shader.TileMode.CLAMP
-        )
+        paint.shader = linearGradient
 
         val centerX: Float
         val centerY: Float
         val oval = RectF()
-        paint.style = Paint.Style.FILL
+        paint.style = style
 
         centerX = width / 2
         centerY = height / 2
@@ -212,50 +130,34 @@ class RoundChart @JvmOverloads constructor(
             centerX + circleRadius,
             centerY + circleRadius
         )
-        canvas.drawArc(oval, START_ANGLE.toFloat(), getAngleByPercent(percentAngle), true, paint)
-
+        canvas.drawArc(oval, START_ANGLE.toFloat(), getAngleByPercent(percentAngle), false, paint)
+        paint.color = Color.RED
+        paint.strokeWidth = 20f
+        paint.style = Paint.Style.STROKE
+        paint.shader = LinearGradient(
+            0f, 0f, 0f, getHeight().toFloat(),
+            Color.RED, Color.WHITE, Shader.TileMode.MIRROR
+        )
+        canvas.drawArc(oval, getAngleByPercent(percentAngle) - 90, 360 - getAngleByPercent(percentAngle), false, paint)
     }
 
-
-    private fun drawPicker(
-        canvas: Canvas,
-        circleRadius: Float,
-        percentAngle: Float,
-        pickerPath: Path
-        ) {
-//        val circleRadius = getRadius(viewWidth.toFloat(), viewHeight.toFloat())
+    private fun drawPicker(canvas: Canvas, circleRadius: Float, percentAngle: Float, pickerPath: Path, linearGradient: LinearGradient) {
         val angleRadians = Math.toRadians(getAngleByPercent(percentAngle).toDouble())
-        val centerX =
-            viewWidth / 2f + Math.sin(angleRadians).toFloat() * circleRadius
-        val centerY =
-            viewHeight / 2f - Math.cos(angleRadians).toFloat() * circleRadius
+        val centerX = viewWidth / 2f + Math.sin(angleRadians).toFloat() * circleRadius
+        val centerY = viewHeight / 2f - Math.cos(angleRadians).toFloat() * circleRadius
 
         pickerPath.reset()
         pickerPath.addCircle(
-            centerX,
-            centerY,
-            5f,
-            Path.Direction.CW
+            centerX, centerY,
+            5f, Path.Direction.CW
         )
-
 
         val paint = Paint()
-        paint.color = Color.CYAN
         paint.strokeWidth = 10f
         paint.style = Paint.Style.STROKE
-        paint.shader = LinearGradient(
-            0f,
-            0f,
-            0f,
-            height.toFloat(),
-            Color.BLACK,
-            Color.RED,
-            Shader.TileMode.MIRROR
-        )
+        paint.shader = linearGradient
         paint.style = Paint.Style.FILL
-
         val radius = 25f
-
         canvas.drawCircle(centerX, centerY, radius, paint)
     }
 
@@ -274,6 +176,18 @@ class RoundChart @JvmOverloads constructor(
 
         this.setMeasuredDimension(parentWidth, parentHeight)
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        initGradients()
+    }
+
+    private fun initGradients() {
+        gradientCircle = LinearGradient(
+            0f, 0f, 0f, height.toFloat(),
+            Color.GREEN, Color.CYAN, Shader.TileMode.CLAMP
+        )
+        gradientPicker = LinearGradient(
+            0f, 0f, 0f, height.toFloat(),
+            Color.GREEN, Color.CYAN, Shader.TileMode.CLAMP
+        )
     }
 
 }

@@ -11,9 +11,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         firstCircle.setOnClickListener {
             with(firstCircle){
-                val randomGrad = ((0..99).random().toFloat())
-                percentExternal = randomGrad
-                gradTextView.text = "${RoundChart.getAngleByPercent(randomGrad)}°"
+                val randomGradExternal = ((0..99).random().toFloat())
+                val randomGradInner = ((0..99).random().toFloat())
+                percentExternal = randomGradExternal
+                percentInner = randomGradInner
+                gradTextView.text = "${RoundChart.getAngleByPercent(randomGradExternal)}°\n${RoundChart.getAngleByPercent(randomGradInner)}°"
             }
             firstCircle.invalidate()
         }
