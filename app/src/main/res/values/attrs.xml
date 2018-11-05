@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="RoundChart">
+        <attr name="mainRadius" format="float"/>
+        <attr name="firstTitle" format="string"/>
+        <attr name="firstValue" format="string"/>
+        <attr name="secondTitle" format="string"/>
+        <attr name="secondValue" format="string"/>
+    </declare-styleable>
+</resources>
