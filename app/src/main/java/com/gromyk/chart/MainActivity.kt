@@ -13,9 +13,10 @@ class MainActivity : AppCompatActivity() {
             with(firstCircle){
                 val randomGradExternal = ((0..99).random().toFloat())
                 val randomGradInner = ((0..99).random().toFloat())
-                percentExternal = randomGradExternal
-                percentInner = randomGradInner
-                gradTextView.text = "${RoundChart.getAngleByPercent(randomGradExternal)}°\n${RoundChart.getAngleByPercent(randomGradInner)}°"
+                val random = ((50..100).random().toFloat())
+                percentExternal = randomGradExternal + random
+                percentInner = randomGradInner + random
+                gradTextView.text = "${RoundChart.getAngleByPercent(percentExternal)}°\n${RoundChart.getAngleByPercent(percentInner)}°"
             }
             firstCircle.invalidate()
         }

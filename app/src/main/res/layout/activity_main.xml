@@ -8,6 +8,7 @@
         tools:context=".MainActivity">
     <TextView
             android:id="@+id/gradTextView"
+            android:text="\n\n"
             android:textAlignment="center"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -16,9 +17,16 @@
             android:id="@+id/firstCircle"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            app:textSize="larger"
+            app:percentInner="149"
+            app:percentExternal="165"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/gradTextView"/>
+            app:layout_constraintTop_toBottomOf="@id/gradTextView"
+            app:firstValue="1234"
+            app:firstLabel="Used"
+            app:secondLabel="Left"
+            app:secondValue="4321"/>
 
 </android.support.constraint.ConstraintLayout>
