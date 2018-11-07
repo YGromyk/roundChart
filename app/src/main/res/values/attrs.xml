@@ -26,5 +26,6 @@
         <attr name="secondLabel" format="string"/>
         <attr name="firstValue" format="string"/>
         <attr name="secondValue" format="string"/>
+        <attr name="mainCircleColor" format="color"/>
     </declare-styleable>
 </resources>

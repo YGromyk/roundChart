@@ -1,12 +1,12 @@
 package com.gromyk.chart
 
 import android.annotation.SuppressLint
-
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import com.gromyk.chart.helpers.*
 
 /**
  * Created by Yuriy Gromyk on 11/5/18.
@@ -17,26 +17,30 @@ class RoundChart @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
-
     companion object {
-        private const val START_ANGLE = -90
-        private const val pickerRadius = 15f
-        private const val pickerBorderRadius = pickerRadius + 10
-        private const val EXTERNAL_CIRCLE_COEFFICIENT_RADIUS = 1.05f
-        private const val INNER_CIRCLE_COEFFICIENT_RADIUS = 1.25f
-        private const val MAIN_CIRCLE_COEFFICIENT_RADIUS = 2f
-
-        @Throws(IllegalArgumentException::class)
-        fun getAngleByPercent(percent: Float) = (360f / 100f) * percent
-
-        fun createAntiAliasingPaint(): Paint {
-            val paint = Paint()
-            paint.flags = Paint.ANTI_ALIAS_FLAG
-            paint.isAntiAlias = true
-            return paint
-        }
+        const val MAIN_CIRCLE_COEFFICIENT = 0.75f
+        const val sqrt2 = 1.41421356f
     }
 
+    /**
+     *  percent value for external circle
+     * @see RoundChart.externalCircle
+     **/
+    var percentExternal: Float = 0f
+        set (value) {
+            externalCircle.progress = value
+            field = value
+        }
+
+    /**
+     * percent value for inner circle
+     * @see RoundChart.innerCircle
+     **/
+    var percentInner: Float = 0f
+        set (value) {
+            innerCircle.progress = value
+            field = value
+        }
 
     enum class TextSize {
         SMALL,
@@ -44,13 +48,19 @@ class RoundChart @JvmOverloads constructor(
         LARGER
     }
 
-    private var FORWARD = true
-    private var shadowRadius = 20f
-    private var strokeWidth = 20f
-    private var strokeWidthOfOverage = 5f
-    private var textSize = 30f
-    private var textColor: Int = Color.BLACK
+    /** properties for text **/
+    private var textSize = 0f
+        set(value) {
+            field = value
+            setTextSizes(value)
+        }
+    private var textMargin = textSize
 
+    init {
+        setTextSize(getTextSizeByEnum(TextSize.MEDIUM.ordinal))
+    }
+
+    private var textColor: Int = Color.BLUE
     private var firstLabel = String()
     private var secondLabel = String()
     private var firstValue = String()
@@ -72,37 +82,45 @@ class RoundChart @JvmOverloads constructor(
     private var firstGradientColorOverageInnerCircle: Int = Color.WHITE
     private var secondGradientColorOverageInnerCircle: Int = Color.RED
 
-    /**percent value for external circle**/
-    var percentExternal: Float = 0f
-    /**percent value for inner circle**/
-    var percentInner: Float = 0f
 
-    /**external circle paints**/
-    private lateinit var externalCirclePaint: Paint
-    private lateinit var innerCirclePaint: Paint
-    private lateinit var externalCirclePickerPaint: Paint
-    private lateinit var externalPickerBorder: Paint
-    /**inner circle paints**/
-    private lateinit var innerCirclePickerPaint: Paint
-    private lateinit var innerPickerBorder: Paint
-    private lateinit var overageOfExternalCirclePaint: Paint
-    private lateinit var overageOfInnerCirclePaint: Paint
-    /**external circle paints, where are all labels with text**/
-    private lateinit var mainCirclePaint: Paint
     /**text labels**/
     private lateinit var firstLabelPaint: Paint
     private lateinit var firstValuePaint: Paint
     private lateinit var secondLabelPaint: Paint
     private lateinit var secondValuePaint: Paint
-    /**gradients for external circle**/
-    private lateinit var externalGradientPicker: LinearGradient
-    private lateinit var externalCircleGradient: LinearGradient
-    private lateinit var externalOverageCircleGradient: LinearGradient
-    /**gradients for inner circle**/
-    private lateinit var innerGradientPicker: LinearGradient
-    private lateinit var innerCircleGradient: LinearGradient
-    private lateinit var innerOverageCircleGradient: LinearGradient
-    private lateinit var defaultGrayGradient: LinearGradient
+
+    private var externalCircle = ProgressCircle.build {
+        isEnabled = true
+        gradientFirstColorCircle = Color.GREEN
+        gradientSecondColorCircle = Color.CYAN
+        firstColorPickerCircle = Color.GREEN
+        secondColorPickerCircle = Color.CYAN
+        gradientFirstColorOverageCircle = Color.BLUE
+        secondGradientColorOverageCircle = Color.RED
+        getPaintsForSetShadow().forEach {
+            setLayerType(LAYER_TYPE_SOFTWARE, it)
+        }
+    }
+
+    private var innerCircle = ProgressCircle.build {
+        coefficient = 0.85f
+        gradientFirstColorCircle = Color.BLUE
+        gradientSecondColorCircle = Color.CYAN
+        firstColorPickerCircle = Color.BLUE
+        secondColorPickerCircle = Color.CYAN
+        gradientFirstColorOverageCircle = Color.BLUE
+        secondGradientColorOverageCircle = Color.RED
+        getPaintsForSetShadow().forEach {
+            setLayerType(LAYER_TYPE_SOFTWARE, it)
+        }
+    }
+
+    /** main circle paint **/
+    private lateinit var mainCircleWithLabels: Paint
+    private var mainCircleSolidColor = Color.GREEN
+    private var mainCircleRadius = 0f
+    var mainCircleShadowRadius = 20f
+    var mainCircleSquareSide = 0f
 
     init {
         init(attrs)
@@ -111,114 +129,54 @@ class RoundChart @JvmOverloads constructor(
 
     private fun initView() {
         initPaints()
-        setupCirclePaint(innerCirclePaint, Paint.Style.STROKE)
-        setupCirclePaint(externalCirclePaint, Paint.Style.STROKE)
-        setupOverageOfCircle(overageOfExternalCirclePaint)
-        setupOverageOfCircle(overageOfInnerCirclePaint)
-        setupMainCircle(mainCirclePaint)
-        setupPickerBorderPaint(externalPickerBorder)
-        setupPickerBorderPaint(innerPickerBorder)
         setupLabelText(firstLabelPaint)
         setupLabelText(secondLabelPaint)
         setupValueText(firstValuePaint)
         setupValueText(secondValuePaint)
+        setupMainCircle(mainCircleWithLabels)
     }
 
     private fun initPaints() {
-        externalCirclePaint = createAntiAliasingPaint()
-        innerCirclePaint = createAntiAliasingPaint()
-        externalCirclePickerPaint = createAntiAliasingPaint()
-        innerCirclePickerPaint = createAntiAliasingPaint()
-        mainCirclePaint = createAntiAliasingPaint()
-        overageOfExternalCirclePaint = createAntiAliasingPaint()
-        overageOfInnerCirclePaint = createAntiAliasingPaint()
-        externalPickerBorder = createAntiAliasingPaint()
-        innerCirclePaint = createAntiAliasingPaint()
-        externalPickerBorder = createAntiAliasingPaint()
-        innerPickerBorder = createAntiAliasingPaint()
-        firstLabelPaint = createAntiAliasingPaint()
-        firstValuePaint = createAntiAliasingPaint()
-        secondLabelPaint = createAntiAliasingPaint()
-        secondValuePaint = createAntiAliasingPaint()
+        firstLabelPaint = PaintHelper.createAntiAliasingPaint()
+        secondLabelPaint = PaintHelper.createAntiAliasingPaint()
+        firstValuePaint = PaintHelper.createAntiAliasingPaint()
+        secondValuePaint = PaintHelper.createAntiAliasingPaint()
+        mainCircleWithLabels = PaintHelper.createAntiAliasingPaint()
     }
 
     private fun setupLabelText(paint: Paint) {
         paint.style = Paint.Style.FILL_AND_STROKE
         paint.color = textColor
         paint.textSize = textSize
-        paint.textAlign = Paint.Align.CENTER
+        paint.textAlign = Paint.Align.RIGHT
     }
 
     private fun setupValueText(paint: Paint) {
         paint.style = Paint.Style.FILL_AND_STROKE
         paint.color = textColor
         paint.textSize = textSize
-        paint.textAlign = Paint.Align.CENTER
+        paint.textAlign = Paint.Align.RIGHT
     }
 
-    private fun setupCirclePaint(paint: Paint, style: Paint.Style) {
-        paint.textSize = textSize
-        paint.color = Color.CYAN
-        paint.style = style
-        paint.strokeWidth = strokeWidth
-    }
-
-    private fun setStrokeWidthOverage(
-        circle: Paint,
-        overageCircle: Paint,
-        percentValue: Float,
-        overageCircleGradient: LinearGradient,
-        picker: Paint,
-        defaultPickerGradient: LinearGradient
-    ) {
-        if (percentValue > 100f) {
-            overageCircle.strokeWidth = strokeWidth
-            setPaintGradient(overageCircle, overageCircleGradient)
-            setPaintGradient(picker, overageCircleGradient)
-        } else {
-            overageCircle.strokeWidth = strokeWidthOfOverage
-            circle.strokeWidth = strokeWidth
-            setPaintGradient(overageCircle, defaultGrayGradient)
-            setPaintGradient(picker, defaultPickerGradient)
-        }
-    }
-
-    private fun setPaintGradient(paint: Paint, linearGradient: LinearGradient) {
-        paint.setShadowLayer(shadowRadius, 0f, 0f, Color.BLACK)
-        setLayerType(LAYER_TYPE_SOFTWARE, paint)
-        paint.shader = linearGradient
-    }
-
-    private fun setupOverageOfCircle(paint: Paint) {
-        paint.color = Color.RED
-        paint.strokeWidth = strokeWidthOfOverage
-        paint.style = Paint.Style.STROKE
-    }
-
-    private fun setupPickerBorderPaint(paint: Paint) {
-        paint.setShadowLayer(shadowRadius, 0f, 0f, Color.BLACK)
-        paint.color = Color.WHITE
+    private fun setupMainCircle(paint: Paint) {
         paint.style = Paint.Style.FILL
+        paint.color = mainCircleSolidColor
+        setLayerType(LAYER_TYPE_SOFTWARE, paint)
+        paint.setShadowLayer(mainCircleShadowRadius, 0f, 0f, Color.BLACK)
     }
 
     /**
      * Set size for text in main circle in sp
      *
-     * @param  size  an attribute given in SP
-     * @see         RoundChart.textSize
+     * @param   size  an attribute given in SP
+     * @see     RoundChart.textSize
      */
     private fun setTextSize(size: Int) {
         textSize = convertSPToPX(size).toFloat()
     }
 
-    private fun setupMainCircle(paint: Paint) {
-        paint.setShadowLayer(shadowRadius, 0f, 0f, Color.BLACK)
-        paint.style = Paint.Style.FILL
-        paint.color = Color.WHITE
-    }
-
-    private fun convertSPToPX(dp: Int): Int {
-        return (dp * resources.displayMetrics.scaledDensity).toInt()
+    private fun convertSPToPX(sp: Int): Int {
+        return (sp * resources.displayMetrics.scaledDensity).toInt()
     }
 
     private fun init(attrs: AttributeSet?) {
@@ -255,8 +213,8 @@ class RoundChart @JvmOverloads constructor(
         secondLabel = typedArray.getString(R.styleable.RoundChart_secondLabel) ?: ""
         firstValue = typedArray.getString(R.styleable.RoundChart_firstValue) ?: ""
         secondValue = typedArray.getString(R.styleable.RoundChart_secondValue) ?: ""
-        textColor = typedArray.getColor(R.styleable.RoundChart_textColor, Color.BLACK)
-
+        textColor = typedArray.getColor(R.styleable.RoundChart_textColor, textColor)
+        mainCircleSolidColor = typedArray.getColor(R.styleable.RoundChart_mainCircleColor, Color.WHITE)
         typedArray.recycle()
     }
 
@@ -269,127 +227,89 @@ class RoundChart @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        setStrokeWidthOverage(
-            externalCirclePaint,
-            overageOfExternalCirclePaint,
-            percentExternal,
-            externalOverageCircleGradient,
-            externalCirclePickerPaint,
-            externalGradientPicker
-        )
-        setStrokeWidthOverage(
-            innerCirclePaint,
-            overageOfInnerCirclePaint,
-            percentInner,
-            innerOverageCircleGradient,
-            innerCirclePickerPaint,
-            innerGradientPicker
-        )
-        drawCircle(
-            canvas,
-            externalCirclePaint,
-            overageOfExternalCirclePaint,
-            getRadius(width.toFloat(), height.toFloat()) / EXTERNAL_CIRCLE_COEFFICIENT_RADIUS,
-            percentExternal
-        )
-        drawCircle(
-            canvas,
-            innerCirclePaint,
-            overageOfInnerCirclePaint,
-            getRadius(width.toFloat(), height.toFloat()) / INNER_CIRCLE_COEFFICIENT_RADIUS,
-            percentInner
-        )
-
-        drawPicker(
-            canvas,
-            externalCirclePickerPaint,
-            externalPickerBorder,
-            getRadius(width.toFloat(), height.toFloat()) / EXTERNAL_CIRCLE_COEFFICIENT_RADIUS,
-            percentExternal
-        )
-        drawPicker(
-            canvas,
-            innerCirclePickerPaint,
-            innerPickerBorder,
-            getRadius(width.toFloat(), height.toFloat()) / INNER_CIRCLE_COEFFICIENT_RADIUS,
-            percentInner
-        )
-        canvas.drawCircle(
-            width / 2f,
-            height / 2f,
-            getRadius(width.toFloat(), height.toFloat()) / MAIN_CIRCLE_COEFFICIENT_RADIUS,
-            mainCirclePaint
-        )
-        drawText(canvas)
-
+        externalCircle.draw(canvas, 0f, 0f, width.toFloat(), height.toFloat())
+        innerCircle.draw(canvas, 0f, 0f, width.toFloat(), height.toFloat())
+        mainCircleRadius = innerCircle.circleRadius * MAIN_CIRCLE_COEFFICIENT
+        canvas.drawCircle(width / 2f, height / 2f, mainCircleRadius, mainCircleWithLabels)
+        drawText(canvas, mainCircleRadius)
     }
 
-    private fun drawText(canvas: Canvas) {
+
+    private fun drawText(canvas: Canvas, circleRadius: Float) {
         val x0 = width / 2f
         val y0 = height / 2f
-        lateinit var coordinates: Point
-        coordinates = drawTextPaint(canvas, firstLabel, firstLabelPaint, Point(x0.toInt(), (y0 - textSize * 2).toInt()))
-        coordinates =
-                drawTextPaint(canvas, firstValue, firstValuePaint, coordinates.apply { y += textSize.toInt() })
-        coordinates =
-                drawTextPaint(canvas, secondLabel, secondLabelPaint, coordinates.apply { y += textSize.toInt() })
-        drawTextPaint(canvas, secondValue, secondValuePaint, coordinates.apply { y += (textSize * 2).toInt() })
+        val cornerPoints = calculateCornerPoints(x0, y0, circleRadius)
+        setMinimumTextSize()
+        val startMargin = firstLabelPaint.measureText(firstLabel, 0, 1)
+        drawTextPaint(canvas, firstLabel, firstLabelPaint, cornerPoints.first.apply { x += startMargin })
+        cornerPoints.first.y += textSize
+        drawTextPaint(canvas, firstValue, firstValuePaint, cornerPoints.first)
+        cornerPoints.first.y += textSize
+        drawTextPaint(
+            canvas,
+            secondLabel,
+            secondLabelPaint,
+            cornerPoints.first
+        )
+        cornerPoints.first.y += textSize
+        drawTextPaint(
+            canvas,
+            secondValue,
+            secondValuePaint,
+            cornerPoints.first
+        )
     }
 
+    private fun setMinimumTextSize() {
+        val minTextSize = getMinTextSizeAndMaxHeight()
+        this.textSize = minTextSize.first
+        textMargin = minTextSize.second + 5f
+    }
 
-    private fun drawTextPaint(canvas: Canvas, text: String, paint: Paint, coordinates: Point): Point {
+    private fun setTextSizes(textSize: Float) {
+        if (::firstValuePaint.isInitialized) firstValuePaint.textSize = textSize
+        if (::firstLabelPaint.isInitialized) firstLabelPaint.textSize = textSize
+        if (::secondValuePaint.isInitialized) secondValuePaint.textSize = textSize
+        if (::secondLabelPaint.isInitialized) secondLabelPaint.textSize = textSize
+    }
+
+    private fun getMinTextSizeAndMaxHeight(): Pair<Float, Float> {
+        val maxWidth = mainCircleSquareSide * 2
+        val list = listOf(
+            calculateTextSize(firstValuePaint, firstValue, maxWidth),
+            calculateTextSize(firstLabelPaint, firstLabel, maxWidth),
+            calculateTextSize(secondValuePaint, secondValue, maxWidth),
+            calculateTextSize(secondLabelPaint, secondLabel, maxWidth)
+        )
+        return Pair(list.map { it.first }.min()!!, list.map { it.second }.max()!!)
+    }
+
+    private fun calculateCornerPoints(x0: Float, y0: Float, radius: Float): Pair<PointF, PointF> {
+        mainCircleSquareSide = radius / sqrt2
+        return Pair(
+            PointF(x0 - mainCircleSquareSide, y0 - mainCircleSquareSide + textSize),
+            PointF(x0 - mainCircleSquareSide, y0 + mainCircleSquareSide - textSize)
+        )
+    }
+
+    private fun drawTextPaint(canvas: Canvas, text: String, paint: Paint, coordinates: PointF) {
         val textWidth = paint.measureText(text)
-        canvas.drawText(text, coordinates.x - (textWidth), coordinates.y.toFloat(), paint)
-        return coordinates
+        canvas.drawText(text, coordinates.x + textWidth, coordinates.y, paint)
     }
 
-    private fun drawCircle(
-        canvas: Canvas,
-        circle: Paint,
-        overageCircle: Paint,
-        circleRadius: Float,
-        percentAngle: Float
-    ) {
-        val width = width.toFloat()
-        val height = height.toFloat()
+    private fun calculateTextSize(textPaint: Paint, text: String, maxWidth: Float): Pair<Float, Float> {
+        textPaint.textSize = 100f
+        var textWidth = textPaint.measureText(text)
 
-        val centerX: Float
-        val centerY: Float
-        val oval = RectF()
-
-        centerX = width / 2
-        centerY = height / 2
-
-        oval.set(
-            centerX - circleRadius,
-            centerY - circleRadius,
-            centerX + circleRadius,
-            centerY + circleRadius
-        )
-        canvas.drawArc(oval, START_ANGLE.toFloat(), getAngleByPercent(percentAngle), false, circle)
-        canvas.drawArc(
-            oval, getAngleByPercent(percentAngle) - 90,
-            360 - getAngleByPercent(percentAngle), false, overageCircle
-        )
+        while (textWidth > maxWidth) {
+            textPaint.textSize = textPaint.textSize - 2
+            textWidth = textPaint.measureText(text)
+        }
+        val bound = Rect()
+        textPaint.getTextBounds(text, 0, text.length, bound)
+        return Pair(textPaint.textSize, bound.height().toFloat())
     }
 
-    private fun drawPicker(
-        canvas: Canvas,
-        picker: Paint,
-        pickerBorder: Paint,
-        circleRadius: Float,
-        percentAngle: Float
-    ) {
-        val angleRadians = Math.toRadians(getAngleByPercent(percentAngle).toDouble())
-        val centerX = width / 2f + Math.sin(angleRadians).toFloat() * circleRadius
-        val centerY = height / 2f - Math.cos(angleRadians).toFloat() * circleRadius
-        canvas.drawCircle(centerX, centerY, pickerBorderRadius, pickerBorder)
-        canvas.drawCircle(centerX, centerY, pickerRadius, picker)
-    }
-
-    private fun getRadius(viewWidth: Float, viewHeight: Float): Float {
-        return Math.min(viewHeight, viewWidth) / 2f
-    }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         Log.v("Chart onMeasure w", View.MeasureSpec.toString(widthMeasureSpec))
@@ -398,45 +318,5 @@ class RoundChart @JvmOverloads constructor(
         val parentHeight = View.MeasureSpec.getSize(heightMeasureSpec)
         this.setMeasuredDimension(parentWidth, parentHeight)
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        initGradients()
     }
-
-    private fun initGradients() {
-        externalCircleGradient = createLinearGradientByColors(
-            firstGradientColorExternalCircle, secondGradientColorExternalCircle, Shader.TileMode.REPEAT
-        )
-        externalGradientPicker = createLinearGradientByColors(
-            firstColorPickerExternalCircle, secondColorPickerExternalCircle, Shader.TileMode.REPEAT
-        )
-        externalOverageCircleGradient = createLinearGradientByColors(
-            firstGradientColorOverageExternalCircle, secondGradientColorOverageExternalCircle, Shader.TileMode.REPEAT
-        )
-        innerCircleGradient = createLinearGradientByColors(
-            firstGradientColorInnerCircle, secondGradientColorInnerCircle, Shader.TileMode.REPEAT
-        )
-        innerGradientPicker = createLinearGradientByColors(
-            firstColorPickerInnerCircle, secondColorPickerInnerCircle, Shader.TileMode.REPEAT
-        )
-        innerOverageCircleGradient = createLinearGradientByColors(
-            firstGradientColorOverageInnerCircle, secondGradientColorOverageInnerCircle, Shader.TileMode.REPEAT
-        )
-
-        defaultGrayGradient = createLinearGradientByColors(
-            Color.GRAY, Color.GRAY, Shader.TileMode.CLAMP
-        )
-
-        setPaintGradient(externalCirclePaint, externalCircleGradient)
-        setPaintGradient(innerCirclePaint, innerCircleGradient)
-        setPaintGradient(innerCirclePickerPaint, innerCircleGradient)
-        setPaintGradient(externalCirclePickerPaint, externalGradientPicker)
-        setPaintGradient(overageOfExternalCirclePaint, externalOverageCircleGradient)
-        setPaintGradient(overageOfInnerCirclePaint, innerOverageCircleGradient)
-    }
-
-
-    private fun createLinearGradientByColors(firstColor: Int, secondColor: Int, gradientMode: Shader.TileMode) =
-        LinearGradient(
-            0f, 0f, 0f, height.toFloat(),
-            firstColor, secondColor, gradientMode
-        )
 }
