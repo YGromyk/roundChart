@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="RoundChart">
+        <attr name="firstGradientColorExternalCircle" format="color" />
+        <attr name="secondGradientColorExternalCircle" format="color" />
+        <attr name="firstColorPickerExternalCircle" format="color" />
+        <attr name="secondColorPickerExternalCircle" format="color" />
+        <attr name="firstGradientColorOverageExternalCircle" format="color" />
+        <attr name="secondGradientColorOverageExternalCircle" format="color" />
+        <attr name="firstGradientColorInnerCircle" format="color" />
+        <attr name="secondGradientColorInnerCircle" format="color" />
+        <attr name="firstColorPickerInnerCircle" format="color" />
+        <attr name="secondColorPickerInnerCircle" format="color" />
+        <attr name="firstGradientColorOverageInnerCircle" format="color" />
+        <attr name="secondGradientColorOverageInnerCircle" format="color" />
+        <attr name="textColor" format="color" />
+        <attr name="textSize" format="enum">
+            <enum name="small" value="0" />
+            <enum name="medium" value="1" />
+            <enum name="larger" value="2" />
+        </attr>
+        <attr name="percentExternal" format="float" />
+        <attr name="percentInner" format="float" />
+        <attr name="firstLabel" format="string" />
+        <attr name="secondLabel" format="string" />
+        <attr name="firstValue" format="string" />
+        <attr name="secondValue" format="string" />
+        <attr name="mainCircleShadow" format="float" />
+        <attr name="mainCircleColor" format="color" />
+        <attr name="isExternalEnabled" format="boolean" />
+        <attr name="isInnerEnabled" format="boolean" />
+        <attr name="textColorFirstLabel" format="color"/>
+        <attr name="textColorSecondLabel" format="color"/>
+        <attr name="textColorFirstValue" format="color"/>
+        <attr name="textColorSecondValue" format="color"/>
+    </declare-styleable>
+</resources>

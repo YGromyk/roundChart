@@ -15,12 +15,14 @@ class MainActivity : AppCompatActivity() {
         fourthCircle.setClickListener()
         fifthCircle.setClickListener()
         sixthCircle.setClickListener()
+        someCircle.setClickListener()
+        someCircle1.setClickListener()
 
     }
 }
 
 fun RoundChart.setClickListener() {
-    setOnClickListener{
+    setOnClickListener {
         with(this) {
             val randomGradExternal = ((0..99).random().toFloat())
             val randomGradInner = ((0..99).random().toFloat())

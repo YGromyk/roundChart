@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import com.gromyk.chart.helpers.*
+import java.lang.Exception
 
 /**
  * Created by Yuriy Gromyk on 11/5/18.
@@ -240,7 +241,12 @@ class RoundChart @JvmOverloads constructor(
         val y0 = height / 2f
         val cornerPoints = calculateCornerPoints(x0, y0, circleRadius)
         setMinimumTextSize()
-        val startMargin = firstLabelPaint.measureText(firstLabel, 0, 1)
+        var startMargin = 5f
+        try {
+            startMargin = firstLabelPaint.measureText(firstLabel, 0, 1)
+        } catch (exception: Exception) {
+            Log.e(this::class.java.simpleName.toUpperCase(), "Exception occured when while measure margin")
+        }
         drawTextPaint(canvas, firstLabel, firstLabelPaint, cornerPoints.first.apply { x += startMargin })
         cornerPoints.first.y += textSize
         drawTextPaint(canvas, firstValue, firstValuePaint, cornerPoints.first)

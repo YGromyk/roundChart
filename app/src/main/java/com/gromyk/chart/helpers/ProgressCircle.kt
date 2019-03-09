@@ -1,6 +1,7 @@
 package com.gromyk.chart.helpers
 
 import android.graphics.*
+import android.util.Log
 import com.gromyk.chart.RoundChartOld
 
 /**
@@ -81,6 +82,7 @@ class ProgressCircle(var coefficient: Float = 1.0f) : DrawableComponent {
 
     override fun draw(canvas: Canvas, x: Float, y: Float, width: Float, height: Float) {
         if (!isEnabled) return
+        val startTime = System.currentTimeMillis()
 
         circleRadius = (Math.min(width / 2, height / 2) * RADIUS_COEFFICIENT) * coefficient
         initGradients(height * coefficient)
@@ -105,6 +107,7 @@ class ProgressCircle(var coefficient: Float = 1.0f) : DrawableComponent {
             overageCircle
         )
         drawPicker(canvas, width, height, circleRadius)
+        Log.e(this::class.java.simpleName, "time of drawing: ${System.currentTimeMillis()- startTime}")
     }
 
     private fun calculateStartAndSweepAngles(): Pair<Float, Float> {
