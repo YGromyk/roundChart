@@ -7,19 +7,20 @@
         android:layout_height="match_parent"
         tools:context=".MainActivity">
 
-
     <com.gromyk.roundchart.RoundChart
-            android:id="@+id/roundChart"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:firstValue="Round chart"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:id="@+id/roundChart"
+            app:firstColorPickerExternalCircle="@color/colorAccent"
+            app:firstGradientColorExternalCircle="#e32"
+            app:firstGradientColorOverageExternalCircle="#000"
+            app:isInnerEnabled="false"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.4"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:percentExternal="165"
-            app:percentInner="14"
-            app:isInnerEnabled="false"
-            app:textColor="@color/colorAccent"
-            app:textSize="larger" />
+            app:layout_constraintWidth_percent="0.5"
+            app:percentExternal="90"
+            app:secondColorPickerExternalCircle="@color/colorPrimaryDark"
+            app:secondGradientColorExternalCircle="#e96244" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -21,11 +21,14 @@ class ProgressCircle(var coefficient: Float = 1.0f) : DrawableComponent {
 
     /** progress for circle in percent **/
     var progress: Float = 0f // 0-100
+
     /****/
     var circleRadius: Float = 0f
         private set
+
     /** property that controls drawing of a circle **/
     var isEnabled = true
+
     /**colors for the circle**/
     var gradientFirstColorCircle: Int = Color.GREEN
     var gradientSecondColorCircle: Int = Color.CYAN
@@ -33,13 +36,16 @@ class ProgressCircle(var coefficient: Float = 1.0f) : DrawableComponent {
     var secondColorPickerCircle: Int = Color.CYAN
     var gradientFirstColorOverageCircle: Int = Color.WHITE
     var secondGradientColorOverageCircle: Int = Color.RED
+
     /**shadow radius for all views**/
     var shadowRadius = 20f
+
     /** paints**/
     private lateinit var circlePaint: Paint
     private lateinit var overageCircle: Paint
     private lateinit var circlePickerPaint: Paint
     private lateinit var circlePickerBorder: Paint
+
     /**gradients for  circle**/
     private lateinit var gradientPicker: LinearGradient
     private lateinit var gradientCircle: LinearGradient
@@ -85,7 +91,7 @@ class ProgressCircle(var coefficient: Float = 1.0f) : DrawableComponent {
         if (!isEnabled) return
         val startTime = System.currentTimeMillis()
 
-        circleRadius = (Math.min(width / 2, height / 2) * RADIUS_COEFFICIENT) * coefficient
+        circleRadius = ((width / 2).coerceAtMost(height / 2) * RADIUS_COEFFICIENT) * coefficient
         initGradients(height * coefficient)
         setGradientsForPaints()
         setStrokeWidthOverage(circleRadius)
@@ -108,7 +114,10 @@ class ProgressCircle(var coefficient: Float = 1.0f) : DrawableComponent {
             overageCircle
         )
         drawPicker(canvas, width, height, circleRadius)
-        Log.e(this::class.java.simpleName, "time of drawing: ${System.currentTimeMillis()- startTime}")
+        Log.e(
+            this::class.java.simpleName,
+            "time of drawing: ${System.currentTimeMillis() - startTime}"
+        )
     }
 
     private fun calculateStartAndSweepAngles(): Pair<Float, Float> {
@@ -133,7 +142,12 @@ class ProgressCircle(var coefficient: Float = 1.0f) : DrawableComponent {
         val angleRadians = Math.toRadians(PaintHelper.getAngleByPercent(progress).toDouble())
         val centerX = width / 2f + sin(angleRadians).toFloat() * circleRadius
         val centerY = height / 2f - cos(angleRadians).toFloat() * circleRadius
-        canvas.drawCircle(centerX, centerY, circleRadius * PICKER_BORDER_COEFFICIENT, circlePickerBorder)
+        canvas.drawCircle(
+            centerX,
+            centerY,
+            circleRadius * PICKER_BORDER_COEFFICIENT,
+            circlePickerBorder
+        )
         canvas.drawCircle(centerX, centerY, circleRadius * PICKER_COEFFICIENT, circlePickerPaint)
     }
 
@@ -151,17 +165,25 @@ class ProgressCircle(var coefficient: Float = 1.0f) : DrawableComponent {
             gradientFirstColorCircle, gradientSecondColorCircle, Shader.TileMode.CLAMP, height
         )
         gradientOverageCircle = PaintHelper.createLinearGradientByColors(
-            gradientFirstColorOverageCircle, secondGradientColorOverageCircle, Shader.TileMode.CLAMP, height
+            gradientFirstColorOverageCircle,
+            secondGradientColorOverageCircle,
+            Shader.TileMode.CLAMP,
+            height
         )
 
         defaultGrayGradient =
-                PaintHelper.createLinearGradientByColors(Color.DKGRAY, Color.DKGRAY, Shader.TileMode.CLAMP, height)
+            PaintHelper.createLinearGradientByColors(
+                Color.DKGRAY,
+                Color.DKGRAY,
+                Shader.TileMode.CLAMP,
+                height
+            )
     }
 
     private fun setGradientsForPaints() {
-        PaintHelper.setPaintGradient(circlePaint, gradientPicker, shadowRadius)
-        PaintHelper.setPaintGradient(overageCircle, gradientCircle, shadowRadius)
-        PaintHelper.setPaintGradient(circlePickerPaint, gradientOverageCircle, shadowRadius)
+        PaintHelper.setPaintGradient(circlePaint, gradientCircle, shadowRadius)
+        PaintHelper.setPaintGradient(overageCircle, gradientOverageCircle, shadowRadius)
+        PaintHelper.setPaintGradient(circlePickerPaint, gradientPicker, shadowRadius)
     }
 
     private fun setStrokeWidthOverage(circleRadius: Float) {

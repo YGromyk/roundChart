@@ -70,19 +70,67 @@ class RoundChart @JvmOverloads constructor(
 
     /**colors for the external circle**/
     private var firstGradientColorExternalCircle: Int = Color.GREEN
+        set(value) {
+            field = value
+            externalCircle.gradientFirstColorCircle = field
+        }
     private var secondGradientColorExternalCircle: Int = Color.CYAN
+        set(value) {
+            field = value
+            externalCircle.gradientSecondColorCircle = field
+        }
     private var firstColorPickerExternalCircle: Int = Color.GREEN
+        set(value) {
+            field = value
+            externalCircle.firstColorPickerCircle = field
+        }
     private var secondColorPickerExternalCircle: Int = Color.CYAN
+        set(value) {
+            field = value
+            externalCircle.secondColorPickerCircle = field
+        }
     private var firstGradientColorOverageExternalCircle: Int = Color.WHITE
+        set(value) {
+            field = value
+            externalCircle.gradientFirstColorOverageCircle = field
+        }
     private var secondGradientColorOverageExternalCircle: Int = Color.RED
+        set(value) {
+            field = value
+            externalCircle.secondGradientColorOverageCircle = field
+        }
 
     /** colors for the inner circle**/
     private var firstGradientColorInnerCircle: Int = Color.GREEN
+        set(value) {
+            field = value
+            innerCircle.gradientFirstColorCircle = field
+        }
     private var secondGradientColorInnerCircle: Int = Color.CYAN
+        set(value) {
+            field = value
+            innerCircle.gradientSecondColorCircle = field
+        }
     private var firstColorPickerInnerCircle: Int = Color.GREEN
+        set(value) {
+            field = value
+            innerCircle.firstColorPickerCircle = field
+        }
     private var secondColorPickerInnerCircle: Int = Color.CYAN
+        set(value) {
+            field = value
+            innerCircle.secondColorPickerCircle = field
+        }
     private var firstGradientColorOverageInnerCircle: Int = Color.WHITE
+        set(value) {
+            field = value
+            innerCircle.gradientFirstColorOverageCircle = field
+        }
     private var secondGradientColorOverageInnerCircle: Int = Color.RED
+        set(value) {
+            field = value
+            innerCircle.secondGradientColorOverageCircle = field
+        }
 
 
     /**text labels**/
@@ -251,6 +299,7 @@ class RoundChart @JvmOverloads constructor(
             innerCircle.isEnabled = getBoolean(R.styleable.RoundChart_isInnerEnabled, true)
             externalCircle.isEnabled = getBoolean(R.styleable.RoundChart_isExternalEnabled, true)
         }.recycle()
+
     }
 
     private fun getTextSizeByEnum(textSize: Int) =
