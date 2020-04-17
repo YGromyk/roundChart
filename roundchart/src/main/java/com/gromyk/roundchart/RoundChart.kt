@@ -32,6 +32,7 @@ class RoundChart @JvmOverloads constructor(
         set(value) {
             externalCircle.progress = value
             field = value
+            invalidate()
         }
 
     /**
@@ -42,6 +43,7 @@ class RoundChart @JvmOverloads constructor(
         set(value) {
             innerCircle.progress = value
             field = value
+            invalidate()
         }
 
     enum class TextSize {
