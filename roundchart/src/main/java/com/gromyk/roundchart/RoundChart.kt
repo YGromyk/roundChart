@@ -248,6 +248,8 @@ class RoundChart @JvmOverloads constructor(
             secondValue = getString(R.styleable.RoundChart_secondValue) ?: ""
             textColor = getColor(R.styleable.RoundChart_textColor, textColor)
             mainCircleSolidColor = getColor(R.styleable.RoundChart_mainCircleColor, Color.WHITE)
+            innerCircle.isEnabled = getBoolean(R.styleable.RoundChart_isInnerEnabled, true)
+            externalCircle.isEnabled = getBoolean(R.styleable.RoundChart_isExternalEnabled, true)
         }.recycle()
     }
 

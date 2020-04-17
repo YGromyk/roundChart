@@ -19,6 +19,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:percentExternal="165"
             app:percentInner="14"
+            app:isInnerEnabled="false"
             app:textColor="@color/colorAccent"
             app:textSize="larger" />
 </androidx.constraintlayout.widget.ConstraintLayout>
