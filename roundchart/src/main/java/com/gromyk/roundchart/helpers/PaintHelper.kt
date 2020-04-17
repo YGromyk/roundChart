@@ -1,10 +1,9 @@
-package com.gromyk.chart.helpers
+package com.gromyk.roundchart.helpers
 
 import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Shader
-import android.view.View
 
 /**
  * Created by Yuriy Gromyk on 11/7/18.

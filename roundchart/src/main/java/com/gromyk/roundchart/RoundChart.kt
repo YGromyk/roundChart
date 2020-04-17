@@ -1,4 +1,4 @@
-package com.gromyk.chart
+package com.gromyk.roundchart
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -6,8 +6,9 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
-import com.gromyk.chart.helpers.*
-import java.lang.Exception
+import com.gromyk.roundchart.helpers.PaintHelper
+import com.gromyk.roundchart.helpers.ProgressCircle
+import com.gromyk.roundchart.helpers.build
 
 /**
  * Created by Yuriy Gromyk on 11/5/18.
@@ -28,7 +29,7 @@ class RoundChart @JvmOverloads constructor(
      * @see RoundChart.externalCircle
      **/
     var percentExternal: Float = 0f
-        set (value) {
+        set(value) {
             externalCircle.progress = value
             field = value
         }
@@ -38,7 +39,7 @@ class RoundChart @JvmOverloads constructor(
      * @see RoundChart.innerCircle
      **/
     var percentInner: Float = 0f
-        set (value) {
+        set(value) {
             innerCircle.progress = value
             field = value
         }
@@ -120,8 +121,8 @@ class RoundChart @JvmOverloads constructor(
     private lateinit var mainCircleWithLabels: Paint
     private var mainCircleSolidColor = Color.GREEN
     private var mainCircleRadius = 0f
-    var mainCircleShadowRadius = 20f
-    var mainCircleSquareSide = 0f
+    private var mainCircleShadowRadius = 20f
+    private var mainCircleSquareSide = 0f
 
     init {
         init(attrs)
@@ -184,39 +185,70 @@ class RoundChart @JvmOverloads constructor(
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.RoundChart)
         val textSizeEnumValue = typedArray.getInt(R.styleable.RoundChart_textSize, 14)
         setTextSize(getTextSizeByEnum(textSizeEnumValue))
-        firstGradientColorInnerCircle =
-                typedArray.getColor(R.styleable.RoundChart_firstGradientColorInnerCircle, Color.GREEN)
-        secondGradientColorInnerCircle =
-                typedArray.getColor(R.styleable.RoundChart_secondGradientColorInnerCircle, Color.CYAN)
-        firstColorPickerInnerCircle =
-                typedArray.getColor(R.styleable.RoundChart_firstColorPickerInnerCircle, Color.GREEN)
-        secondColorPickerInnerCircle =
-                typedArray.getColor(R.styleable.RoundChart_secondColorPickerInnerCircle, Color.CYAN)
-        firstGradientColorOverageInnerCircle =
-                typedArray.getColor(R.styleable.RoundChart_firstGradientColorOverageInnerCircle, Color.RED)
-        secondGradientColorOverageInnerCircle =
-                typedArray.getColor(R.styleable.RoundChart_secondGradientColorOverageInnerCircle, Color.WHITE)
-        firstGradientColorExternalCircle =
-                typedArray.getColor(R.styleable.RoundChart_firstGradientColorExternalCircle, Color.GREEN)
-        secondGradientColorExternalCircle =
-                typedArray.getColor(R.styleable.RoundChart_secondGradientColorExternalCircle, Color.CYAN)
-        firstColorPickerExternalCircle =
-                typedArray.getColor(R.styleable.RoundChart_firstColorPickerExternalCircle, Color.GREEN)
-        secondColorPickerExternalCircle =
-                typedArray.getColor(R.styleable.RoundChart_secondColorPickerExternalCircle, Color.CYAN)
-        firstGradientColorOverageExternalCircle =
-                typedArray.getColor(R.styleable.RoundChart_firstGradientColorOverageExternalCircle, Color.RED)
-        secondGradientColorOverageExternalCircle =
-                typedArray.getColor(R.styleable.RoundChart_secondGradientColorOverageExternalCircle, Color.WHITE)
-        percentExternal = typedArray.getFloat(R.styleable.RoundChart_percentExternal, 0f)
-        percentInner = typedArray.getFloat(R.styleable.RoundChart_percentInner, 0f)
-        firstLabel = typedArray.getString(R.styleable.RoundChart_firstLabel) ?: ""
-        secondLabel = typedArray.getString(R.styleable.RoundChart_secondLabel) ?: ""
-        firstValue = typedArray.getString(R.styleable.RoundChart_firstValue) ?: ""
-        secondValue = typedArray.getString(R.styleable.RoundChart_secondValue) ?: ""
-        textColor = typedArray.getColor(R.styleable.RoundChart_textColor, textColor)
-        mainCircleSolidColor = typedArray.getColor(R.styleable.RoundChart_mainCircleColor, Color.WHITE)
-        typedArray.recycle()
+        typedArray.apply {
+            firstGradientColorInnerCircle =
+                getColor(
+                    R.styleable.RoundChart_firstGradientColorInnerCircle,
+                    Color.GREEN
+                )
+            secondGradientColorInnerCircle =
+                getColor(
+                    R.styleable.RoundChart_secondGradientColorInnerCircle,
+                    Color.CYAN
+                )
+            firstColorPickerInnerCircle =
+                getColor(R.styleable.RoundChart_firstColorPickerInnerCircle, Color.GREEN)
+            secondColorPickerInnerCircle =
+                getColor(R.styleable.RoundChart_secondColorPickerInnerCircle, Color.CYAN)
+            firstGradientColorOverageInnerCircle =
+                getColor(
+                    R.styleable.RoundChart_firstGradientColorOverageInnerCircle,
+                    Color.RED
+                )
+            secondGradientColorOverageInnerCircle =
+                getColor(
+                    R.styleable.RoundChart_secondGradientColorOverageInnerCircle,
+                    Color.WHITE
+                )
+            firstGradientColorExternalCircle =
+                getColor(
+                    R.styleable.RoundChart_firstGradientColorExternalCircle,
+                    Color.GREEN
+                )
+            secondGradientColorExternalCircle =
+                getColor(
+                    R.styleable.RoundChart_secondGradientColorExternalCircle,
+                    Color.CYAN
+                )
+            firstColorPickerExternalCircle =
+                getColor(
+                    R.styleable.RoundChart_firstColorPickerExternalCircle,
+                    Color.GREEN
+                )
+            secondColorPickerExternalCircle =
+                getColor(
+                    R.styleable.RoundChart_secondColorPickerExternalCircle,
+                    Color.CYAN
+                )
+            firstGradientColorOverageExternalCircle =
+                getColor(
+                    R.styleable.RoundChart_firstGradientColorOverageExternalCircle,
+                    Color.RED
+                )
+            secondGradientColorOverageExternalCircle =
+                getColor(
+                    R.styleable.RoundChart_secondGradientColorOverageExternalCircle,
+                    Color.WHITE
+                )
+            percentExternal = getFloat(R.styleable.RoundChart_percentExternal, 0f)
+            percentInner = getFloat(R.styleable.RoundChart_percentInner, 0f)
+            firstLabel = getString(R.styleable.RoundChart_firstLabel) ?: ""
+            secondLabel = getString(R.styleable.RoundChart_secondLabel) ?: ""
+            firstValue = getString(R.styleable.RoundChart_firstValue) ?: ""
+            secondValue = getString(R.styleable.RoundChart_secondValue) ?: ""
+            textColor = getColor(R.styleable.RoundChart_textColor, textColor)
+            mainCircleSolidColor = getColor(R.styleable.RoundChart_mainCircleColor, Color.WHITE)
+        }.recycle()
     }
 
     private fun getTextSizeByEnum(textSize: Int) =
@@ -245,9 +277,16 @@ class RoundChart @JvmOverloads constructor(
         try {
             startMargin = firstLabelPaint.measureText(firstLabel, 0, 1)
         } catch (exception: Exception) {
-            Log.e(this::class.java.simpleName.toUpperCase(), "Exception occured when while measure margin")
+            Log.e(
+                this::class.java.simpleName.toUpperCase(),
+                "Exception occured when while measure margin"
+            )
         }
-        drawTextPaint(canvas, firstLabel, firstLabelPaint, cornerPoints.first.apply { x += startMargin })
+        drawTextPaint(
+            canvas,
+            firstLabel,
+            firstLabelPaint,
+            cornerPoints.first.apply { x += startMargin })
         cornerPoints.first.y += textSize
         drawTextPaint(canvas, firstValue, firstValuePaint, cornerPoints.first)
         cornerPoints.first.y += textSize
@@ -303,7 +342,11 @@ class RoundChart @JvmOverloads constructor(
         canvas.drawText(text, coordinates.x + textWidth, coordinates.y, paint)
     }
 
-    private fun calculateTextSize(textPaint: Paint, text: String, maxWidth: Float): Pair<Float, Float> {
+    private fun calculateTextSize(
+        textPaint: Paint,
+        text: String,
+        maxWidth: Float
+    ): Pair<Float, Float> {
         textPaint.textSize = 100f
         var textWidth = textPaint.measureText(text)
 
@@ -318,10 +361,10 @@ class RoundChart @JvmOverloads constructor(
 
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        Log.v("Chart onMeasure w", View.MeasureSpec.toString(widthMeasureSpec))
-        Log.v("Chart onMeasure h", View.MeasureSpec.toString(heightMeasureSpec))
-        val parentWidth = View.MeasureSpec.getSize(widthMeasureSpec)
-        val parentHeight = View.MeasureSpec.getSize(heightMeasureSpec)
+        Log.v("Chart onMeasure w", MeasureSpec.toString(widthMeasureSpec))
+        Log.v("Chart onMeasure h", MeasureSpec.toString(heightMeasureSpec))
+        val parentWidth = MeasureSpec.getSize(widthMeasureSpec)
+        val parentHeight = MeasureSpec.getSize(heightMeasureSpec)
         this.setMeasuredDimension(parentWidth, parentHeight)
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }

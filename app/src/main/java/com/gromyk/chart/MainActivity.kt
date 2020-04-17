@@ -1,7 +1,7 @@
 package com.gromyk.chart
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -9,19 +9,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        firstCircle.setClickListener()
-        secondCircle.setClickListener()
-        thirdCircle.setClickListener()
-        fourthCircle.setClickListener()
-        fifthCircle.setClickListener()
-        sixthCircle.setClickListener()
-        someCircle.setClickListener()
-        someCircle1.setClickListener()
-
+        roundChart.setClickListener()
     }
 }
 
-fun RoundChart.setClickListener() {
+fun com.gromyk.roundchart.RoundChart.setClickListener() {
     setOnClickListener {
         with(this) {
             val randomGradExternal = ((0..99).random().toFloat())

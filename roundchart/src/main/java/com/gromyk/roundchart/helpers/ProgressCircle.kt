@@ -1,8 +1,9 @@
-package com.gromyk.chart.helpers
+package com.gromyk.roundchart.helpers
 
 import android.graphics.*
 import android.util.Log
-import com.gromyk.chart.RoundChartOld
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
  * Created by Yuriy Gromyk on 11/7/18.
@@ -129,9 +130,9 @@ class ProgressCircle(var coefficient: Float = 1.0f) : DrawableComponent {
         height: Float,
         circleRadius: Float
     ) {
-        val angleRadians = Math.toRadians(RoundChartOld.getAngleByPercent(progress).toDouble())
-        val centerX = width / 2f + Math.sin(angleRadians).toFloat() * circleRadius
-        val centerY = height / 2f - Math.cos(angleRadians).toFloat() * circleRadius
+        val angleRadians = Math.toRadians(PaintHelper.getAngleByPercent(progress).toDouble())
+        val centerX = width / 2f + sin(angleRadians).toFloat() * circleRadius
+        val centerY = height / 2f - cos(angleRadians).toFloat() * circleRadius
         canvas.drawCircle(centerX, centerY, circleRadius * PICKER_BORDER_COEFFICIENT, circlePickerBorder)
         canvas.drawCircle(centerX, centerY, circleRadius * PICKER_COEFFICIENT, circlePickerPaint)
     }

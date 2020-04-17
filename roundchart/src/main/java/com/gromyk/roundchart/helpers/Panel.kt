@@ -1,4 +1,4 @@
-package com.gromyk.chart.helpers
+package com.gromyk.roundchart.helpers
 
 import android.graphics.Canvas
 
